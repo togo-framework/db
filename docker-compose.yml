@@ -1,0 +1,55 @@
+# togo-postgres stack — bring it up with `docker compose up -d`.
+# Postgres image: the published ghcr.io/togo-framework/db (ParadeDB + pg_cron + pg_partman).
+# NATS JetStream provides the MQ. GoTrue (auth) + Storage are optional Supabase
+# services — uncomment + set the secrets to enable them.
+services:
+  db:
+    image: ghcr.io/togo-framework/db:latest
+    # pg_cron must be preloaded; point it at the app database.
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_cron
+      - -c
+      - cron.database_name=${POSTGRES_DB:-togo}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-togo}
+    ports:
+      - "5432:5432"
+    volumes:
+      - togo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nats:
+    image: nats:2
+    command: ["-js"] # JetStream (jobs / MQ)
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+
+  # ── Optional Supabase services (uncomment + set secrets) ─────────────────────
+  # auth:
+  #   image: supabase/gotrue:latest
+  #   depends_on: { db: { condition: service_healthy } }
+  #   environment:
+  #     GOTRUE_DB_DRIVER: postgres
+  #     GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-togo}?sslmode=disable
+  #     GOTRUE_JWT_SECRET: ${JWT_SECRET:-super-secret-change-me}
+  #     GOTRUE_SITE_URL: http://localhost:3000
+  #   ports: ["9999:9999"]
+  # storage:
+  #   image: supabase/storage-api:latest
+  #   depends_on: { db: { condition: service_healthy } }
+  #   environment:
+  #     DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-togo}?sslmode=disable
+  #     PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-change-me}
+  #   ports: ["5000:5000"]
+
+volumes:
+  togo_pgdata:
