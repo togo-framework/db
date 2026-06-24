@@ -34,14 +34,14 @@ docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres \
 Extensions are enabled on first init (`docker/initdb/01-extensions.sql`): `vector`,
 `pg_search`, `pg_analytics`, `pg_cron`, `pg_partman`.
 
+---
+
 ## 💎 Premium sponsors
 
 togo is proudly sponsored by **ID8 Media** and **One Studio**.
 
 <p align="center">
-  <a href="https://id8media.com"><strong>ID8 Media</strong></a>
-  &nbsp;·&nbsp;
-  <a href="https://one-studio.co"><img src=".github/assets/one-studio.jpeg" height="40" alt="One Studio"></a>
+  <a href="https://id8media.com"><img src=".github/assets/id8media.svg" height="44" alt="ID8 Media" /></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://one-studio.co"><img src=".github/assets/one-studio.jpeg" height="44" alt="One Studio" /></a>
 </p>
-
-MIT · https://github.com/togo-framework/db
